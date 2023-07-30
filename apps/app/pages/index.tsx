@@ -163,38 +163,32 @@ const HomePage: NextPage = () => {
               </div>
             </div>
           </>
-          <div className="grid place-items-center h-full overflow-y-auto py-5 px-7">                
+          <div className="grid place-items-center h-full overflow-y-auto py-5 px-7">
               <div className="flex flex-col rounded-[10px] bg-brand-base shadow-md">
-                  
                 {(parseInt(process.env.NEXT_PUBLIC_ENABLE_OAUTH || "0") || parseInt(process.env.NEXT_PUBLIC_ENABLE_OIDC || "0")) ? (
                   <>
                     <h1 className="text-center text-2xl sm:text-2.5xl font-semibold text-custom-text-100">
                       Sign in to Plane
                     </h1>
                     <div className="flex flex-col divide-y divide-custom-border-200">
-                          
                       {parseInt(process.env.NEXT_PUBLIC_AUTO_OIDC || "0") ? (
                         <></>
                       ) : (
                         <div className="pb-7">
                           <EmailCodeForm handleSignIn={handleEmailCodeSignIn} />
                         </div>
-                          )}
-                          
-                          {parseInt(process.env.NEXT_PUBLIC_ENABLE_OIDC || "0") ? (
-                            <div className="flex flex-col items-center justify-center gap-4 pt-7 sm:w-[360px] mx-auto overflow-hidden">
-                              <OidcLoginButton handleSignIn={handleOidcSignIn} />
-                            </div>
-                          ) : null}
-                        
-                      <div className="flex flex-col items-center justify-center gap-4 pt-7 sm:w-[360px] mx-auto overflow-hidden">
-                        {parseInt(process.env.NEXT_PUBLIC_ENABLE_OAUTH || "0") ? (
-                          <>
-                            <GoogleLoginButton handleSignIn={handleGoogleSignIn} />
-                            <GithubLoginButton handleSignIn={handleGitHubSignIn} />
-                          </>
-                        ) : <></>}
-                      </div>
+                      )}
+                      {parseInt(process.env.NEXT_PUBLIC_ENABLE_OIDC || "0") ? (
+                        <div className="flex flex-col items-center justify-center gap-4 pt-7 sm:w-[360px] mx-auto overflow-hidden">
+                          <OidcLoginButton handleSignIn={handleOidcSignIn} />
+                        </div>
+                      ) : null}
+                      {parseInt(process.env.NEXT_PUBLIC_ENABLE_OAUTH || "0") ? (
+                        <div className="flex flex-col items-center justify-center gap-4 pt-7 sm:w-[360px] mx-auto overflow-hidden">
+                          <GoogleLoginButton handleSignIn={handleGoogleSignIn} />
+                          <GithubLoginButton handleSignIn={handleGitHubSignIn} />
+                        </div>
+                      ) : <></>}
                     </div>
                   </>
                 ) : (
