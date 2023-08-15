@@ -12,6 +12,7 @@ import {
   ViewEstimateSelect,
   ViewIssueLabel,
   ViewPrioritySelect,
+  ViewStartDateSelect,
   ViewStateSelect,
 } from "components/issues";
 import { Popover2 } from "@blueprintjs/popover2";
@@ -263,7 +264,7 @@ export const SingleSpreadsheetIssue: React.FC<Props> = ({
           )}
         </div>
 
-        <Link href={`/${workspaceSlug}/projects/${issue?.project_detail?.id}/issues/${issue.id}`}>
+        <Link href={`/${workspaceSlug}/projects/${issue.project}/issues/${issue.id}`}>
           <a className="truncate text-custom-text-100 cursor-pointer w-full text-[0.825rem]">
             {issue.name}
           </a>
@@ -312,6 +313,19 @@ export const SingleSpreadsheetIssue: React.FC<Props> = ({
       {properties.labels && (
         <div className="flex items-center text-xs text-custom-text-200 text-center p-2 group-hover:bg-custom-background-80 border-custom-border-200">
           <ViewIssueLabel issue={issue} maxRender={1} />
+        </div>
+      )}
+
+      {properties.start_date && (
+        <div className="flex items-center text-xs text-custom-text-200 text-center p-2 group-hover:bg-custom-background-80 border-custom-border-200">
+          <ViewStartDateSelect
+            issue={issue}
+            partialUpdateIssue={partialUpdateIssue}
+            tooltipPosition={tooltipPosition}
+            noBorder
+            user={user}
+            isNotAllowed={isNotAllowed}
+          />
         </div>
       )}
 

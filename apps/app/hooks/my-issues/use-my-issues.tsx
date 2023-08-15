@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { useRouter } from "next/router";
+
 import useSWR from "swr";
 
 // services
@@ -12,6 +14,8 @@ import { IIssue } from "types";
 import { USER_ISSUES } from "constants/fetch-keys";
 
 const useMyIssues = (workspaceSlug: string | undefined) => {
+  const router = useRouter();
+
   const { filters, groupBy, orderBy } = useMyIssuesFilters(workspaceSlug);
 
   const params: any = {
@@ -22,13 +26,18 @@ const useMyIssues = (workspaceSlug: string | undefined) => {
     order_by: orderBy,
     priority: filters?.priority ? filters?.priority.join(",") : undefined,
     state_group: filters?.state_group ? filters?.state_group.join(",") : undefined,
+    subscriber: filters?.subscriber ? filters?.subscriber.join(",") : undefined,
     target_date: filters?.target_date ? filters?.target_date.join(",") : undefined,
     type: filters?.type ? filters?.type : undefined,
   };
 
   const { data: myIssues, mutate: mutateMyIssues } = useSWR(
-    workspaceSlug ? USER_ISSUES(workspaceSlug.toString(), params) : null,
-    workspaceSlug ? () => userService.userIssues(workspaceSlug.toString(), params) : null
+    workspaceSlug && router.pathname.includes("my-issues")
+      ? USER_ISSUES(workspaceSlug.toString(), params)
+      : null,
+    workspaceSlug && router.pathname.includes("my-issues")
+      ? () => userService.userIssues(workspaceSlug.toString(), params)
+      : null
   );
 
   const groupedIssues:
@@ -43,8 +52,23 @@ const useMyIssues = (workspaceSlug: string | undefined) => {
         allIssues: myIssues,
       };
 
+    if (groupBy === "state_detail.group") {
+      return myIssues
+        ? Object.assign(
+            {
+              backlog: [],
+              unstarted: [],
+              started: [],
+              completed: [],
+              cancelled: [],
+            },
+            myIssues
+          )
+        : undefined;
+    }
+
     return myIssues;
-  }, [myIssues]);
+  }, [groupBy, myIssues]);
 
   const isEmpty =
     Object.values(groupedIssues ?? {}).every((group) => group.length === 0) ||

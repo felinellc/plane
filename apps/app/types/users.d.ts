@@ -1,5 +1,6 @@
 import {
   IIssue,
+  IIssueActivity,
   IIssueLite,
   IWorkspace,
   IWorkspaceLite,
@@ -10,10 +11,12 @@ import {
 
 export interface IUser {
   avatar: string;
+  cover_image: string | null;
   created_at: readonly Date;
   created_location: readonly string;
   date_joined: readonly Date;
   email: string;
+  display_name: string;
   first_name: string;
   id: readonly string;
   is_email_verified: boolean;
@@ -27,7 +30,7 @@ export interface IUser {
     properties: Properties;
     groupBy: NestedKeyOf<IIssue> | null;
   } | null;
-  onboarding_step: OnboardingSteps;
+  onboarding_step: TOnboardingSteps;
   role: string;
   token: string;
   theme: ICustomTheme;
@@ -35,16 +38,6 @@ export interface IUser {
   username: string;
 
   [...rest: string]: any;
-}
-
-export interface ICustomTheme {
-  background: string;
-  text: string;
-  primary: string;
-  sidebarBackground: string;
-  sidebarText: string;
-  darkPalette: boolean;
-  palette: string;
 }
 
 export interface ICurrentUserResponse extends IUser {
@@ -62,11 +55,15 @@ export interface ICurrentUserResponse extends IUser {
 export interface IUserLite {
   avatar: string;
   created_at: Date;
-  email: string;
+  display_name: string;
   first_name: string;
   readonly id: string;
   is_bot: boolean;
   last_name: string;
+}
+
+export interface IUserMemberLite extends IUserLite {
+  email: string;
 }
 
 export interface IUserActivity {
@@ -99,29 +96,6 @@ export interface IUserWorkspaceDashboard {
   upcoming_issues: IIssueLite[];
 }
 
-export interface IUserDetailedActivity {
-  actor: string;
-  actor_detail: IUserLite;
-  attachments: any[];
-  comment: string;
-  created_at: string;
-  created_by: string | null;
-  field: string;
-  id: string;
-  issue: string;
-  issue_comment: string | null;
-  new_identifier: string | null;
-  new_value: string | null;
-  old_identifier: string | null;
-  old_value: string | null;
-  project: string;
-  updated_at: string;
-  updated_by: string | null;
-  verb: string;
-  workspace: string;
-  workspace_detail: IWorkspaceLite;
-}
-
 export interface IUserActivityResponse {
   count: number;
   extra_stats: null;
@@ -129,7 +103,7 @@ export interface IUserActivityResponse {
   next_page_results: boolean;
   prev_cursor: string;
   prev_page_results: boolean;
-  results: IUserDetailedActivity[];
+  results: IIssueActivity[];
   total_pages: number;
 }
 
@@ -140,7 +114,7 @@ export type UserAuth = {
   isGuest: boolean;
 };
 
-export type OnboardingSteps = {
+export type TOnboardingSteps = {
   profile_complete: boolean;
   workspace_create: boolean;
   workspace_invite: boolean;
@@ -173,9 +147,39 @@ export interface IUserProfileProjectSegregation {
     avatar: string;
     cover_image: string | null;
     date_joined: Date;
-    email: string;
+    display_name: string;
     first_name: string;
     last_name: string;
     user_timezone: string;
   };
+}
+
+export interface ICurrentUser {
+  id: readonly string;
+  avatar: string;
+  first_name: string;
+  last_name: string;
+  username: string;
+  email: string;
+  mobile_number: string;
+  is_email_verified: boolean;
+  is_tour_completed: boolean;
+  onboarding_step: TOnboardingSteps;
+  is_onboarded: boolean;
+  role: string;
+}
+
+export interface ICustomTheme {
+  background: string;
+  text: string;
+  primary: string;
+  sidebarBackground: string;
+  sidebarText: string;
+  darkPalette: boolean;
+  palette: string;
+  theme: string;
+}
+
+export interface ICurrentUserSettings {
+  theme: ICustomTheme;
 }

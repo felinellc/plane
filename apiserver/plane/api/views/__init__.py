@@ -12,8 +12,12 @@ from .project import (
     ProjectUserViewsEndpoint,
     ProjectMemberUserEndpoint,
     ProjectFavoritesViewSet,
+    ProjectDeployBoardIssuesPublicEndpoint,
+    ProjectDeployBoardViewSet,
+    ProjectDeployBoardPublicSettingsEndpoint,
+    ProjectMemberEndpoint,
 )
-from .people import (
+from .user import (
     UserEndpoint,
     UpdateUserOnBoardedEndpoint,
     UpdateUserTourCompletedEndpoint,
@@ -21,6 +25,8 @@ from .people import (
 )
 
 from .oauth import OauthEndpoint
+
+from .oidc import OIDCEndpoint
 
 from .base import BaseAPIView, BaseViewSet
 
@@ -47,6 +53,7 @@ from .workspace import (
     WorkspaceUserProfileEndpoint,
     WorkspaceUserProfileIssuesEndpoint,
     WorkspaceLabelsEndpoint,
+    WorkspaceMembersEndpoint,
 )
 from .state import StateViewSet
 from .view import IssueViewViewSet, ViewIssuesEndpoint, IssueViewFavoriteViewSet
@@ -73,6 +80,12 @@ from .issue import (
     IssueAttachmentEndpoint,
     IssueArchiveViewSet,
     IssueSubscriberViewSet,
+    IssueCommentPublicViewSet,
+    CommentReactionViewSet,
+    IssueReactionViewSet,
+    IssueReactionPublicViewSet,
+    CommentReactionPublicViewSet,
+    IssueVotePublicViewSet,
 )
 
 from .auth_extended import (
@@ -140,7 +153,7 @@ from .estimate import (
 
 from .release import ReleaseNotesEndpoint
 
-from .inbox import InboxViewSet, InboxIssueViewSet
+from .inbox import InboxViewSet, InboxIssueViewSet, InboxIssuePublicViewSet
 
 from .analytic import (
     AnalyticsEndpoint,
@@ -151,3 +164,7 @@ from .analytic import (
 )
 
 from .notification import NotificationViewSet, UnreadNotificationEndpoint
+
+from .exporter import (
+    ExportIssuesEndpoint,
+)

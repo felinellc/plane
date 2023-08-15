@@ -21,6 +21,7 @@ import {
   ViewEstimateSelect,
   ViewLabelSelect,
   ViewPrioritySelect,
+  ViewStartDateSelect,
   ViewStateSelect,
 } from "components/issues";
 // icons
@@ -192,7 +193,7 @@ export const SingleCalendarIssue: React.FC<Props> = ({
             </CustomMenu>
           </div>
         )}
-        <Link href={`/${workspaceSlug}/projects/${issue?.project_detail.id}/issues/${issue.id}`}>
+        <Link href={`/${workspaceSlug}/projects/${issue.project}/issues/${issue.id}`}>
           <a className="flex w-full cursor-pointer flex-col items-start justify-center gap-1.5">
             {properties.key && (
               <Tooltip
@@ -230,7 +231,14 @@ export const SingleCalendarIssue: React.FC<Props> = ({
                 user={user}
               />
             )}
-
+            {properties.start_date && issue.start_date && (
+              <ViewStartDateSelect
+                issue={issue}
+                partialUpdateIssue={partialUpdateIssue}
+                user={user}
+                isNotAllowed={isNotAllowed}
+              />
+            )}
             {properties.due_date && issue.target_date && (
               <ViewDueDateSelect
                 issue={issue}

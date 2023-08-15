@@ -27,6 +27,7 @@ import { snoozeOptions } from "constants/notification";
 type NotificationCardProps = {
   notification: IUserNotification;
   markNotificationReadStatus: (notificationId: string) => Promise<void>;
+  markNotificationReadStatusToggle: (notificationId: string) => Promise<void>;
   markNotificationArchivedStatus: (notificationId: string) => Promise<void>;
   setSelectedNotificationForSnooze: (notificationId: string) => void;
   markSnoozeNotification: (notificationId: string, dateTime?: Date | undefined) => Promise<void>;
@@ -36,6 +37,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = (props) => {
   const {
     notification,
     markNotificationReadStatus,
+    markNotificationReadStatusToggle,
     markNotificationArchivedStatus,
     setSelectedNotificationForSnooze,
     markSnoozeNotification,
@@ -76,8 +78,8 @@ export const NotificationCard: React.FC<NotificationCardProps> = (props) => {
         ) : (
           <div className="w-12 h-12 bg-custom-background-80 rounded-full flex justify-center items-center">
             <span className="text-custom-text-100 font-medium text-lg">
-              {notification.triggered_by_details.first_name?.[0] ? (
-                notification.triggered_by_details.first_name?.[0]?.toUpperCase()
+              {notification.triggered_by_details.display_name?.[0] ? (
+                notification.triggered_by_details.display_name?.[0]?.toUpperCase()
               ) : (
                 <Icon iconName="person" className="h-6 w-6" />
               )}
@@ -87,10 +89,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = (props) => {
       </div>
       <div className="space-y-2.5 w-full overflow-hidden">
         <div className="text-sm w-full break-words">
-          <span className="font-semibold">
-            {notification.triggered_by_details.first_name}{" "}
-            {notification.triggered_by_details.last_name}{" "}
-          </span>
+          <span className="font-semibold">{notification.triggered_by_details.display_name} </span>
           {notification.data.issue_activity.field !== "comment" &&
             notification.data.issue_activity.verb}{" "}
           {notification.data.issue_activity.field === "comment"
@@ -159,7 +158,7 @@ export const NotificationCard: React.FC<NotificationCardProps> = (props) => {
             name: notification.read_at ? "Mark as unread" : "Mark as read",
             icon: "chat_bubble",
             onClick: () => {
-              markNotificationReadStatus(notification.id).then(() => {
+              markNotificationReadStatusToggle(notification.id).then(() => {
                 setToastAlert({
                   title: notification.read_at
                     ? "Notification marked as unread"

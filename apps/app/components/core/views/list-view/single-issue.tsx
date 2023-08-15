@@ -16,6 +16,7 @@ import {
   ViewEstimateSelect,
   ViewIssueLabel,
   ViewPrioritySelect,
+  ViewStartDateSelect,
   ViewStateSelect,
 } from "components/issues";
 // ui
@@ -156,9 +157,9 @@ export const SingleListIssue: React.FC<Props> = ({
     });
   };
 
-  const singleIssuePath = isArchivedIssues
-    ? `/${workspaceSlug}/projects/${projectId}/archived-issues/${issue.id}`
-    : `/${workspaceSlug}/projects/${projectId}/issues/${issue.id}`;
+  const issuePath = isArchivedIssues
+    ? `/${workspaceSlug}/projects/${issue.project}/archived-issues/${issue.id}`
+    : `/${workspaceSlug}/projects/${issue.project}/issues/${issue.id}`;
 
   const isNotAllowed =
     userAuth.isGuest || userAuth.isViewer || disableUserActions || isArchivedIssues;
@@ -187,22 +188,22 @@ export const SingleListIssue: React.FC<Props> = ({
         <ContextMenu.Item Icon={LinkIcon} onClick={handleCopyText}>
           Copy issue link
         </ContextMenu.Item>
-        <a href={singleIssuePath} target="_blank" rel="noreferrer noopener">
+        <a href={issuePath} target="_blank" rel="noreferrer noopener">
           <ContextMenu.Item Icon={ArrowTopRightOnSquareIcon}>
             Open issue in new tab
           </ContextMenu.Item>
         </a>
       </ContextMenu>
       <div
-        className="flex flex-wrap items-center justify-between px-4 py-2.5 gap-2 border-b border-custom-border-200 bg-custom-background-100 last:border-b-0"
+        className="flex items-center justify-between px-4 py-2.5 gap-10 border-b border-custom-border-200 bg-custom-background-100 last:border-b-0"
         onContextMenu={(e) => {
           e.preventDefault();
           setContextMenu(true);
           setContextMenuPosition({ x: e.pageX, y: e.pageY });
         }}
       >
-        <Link href={singleIssuePath}>
-          <div className="flex-grow cursor-pointer">
+        <div className="flex-grow cursor-pointer min-w-[200px] whitespace-nowrap overflow-hidden overflow-ellipsis">
+          <Link href={issuePath}>
             <a className="group relative flex items-center gap-2">
               {properties.key && (
                 <Tooltip
@@ -215,16 +216,14 @@ export const SingleListIssue: React.FC<Props> = ({
                 </Tooltip>
               )}
               <Tooltip position="top-left" tooltipHeading="Title" tooltipContent={issue.name}>
-                <span className="text-[0.825rem] text-custom-text-100">
-                  {truncateText(issue.name, 50)}
-                </span>
+                <span className="truncate text-[0.825rem] text-custom-text-100">{issue.name}</span>
               </Tooltip>
             </a>
-          </div>
-        </Link>
+          </Link>
+        </div>
 
         <div
-          className={`flex w-full flex-shrink flex-wrap items-center gap-2 text-xs sm:w-auto ${
+          className={`flex flex-shrink-0 items-center gap-2 text-xs ${
             isArchivedIssues ? "opacity-60" : ""
           }`}
         >
@@ -242,6 +241,14 @@ export const SingleListIssue: React.FC<Props> = ({
               issue={issue}
               partialUpdateIssue={partialUpdateIssue}
               position="right"
+              user={user}
+              isNotAllowed={isNotAllowed}
+            />
+          )}
+          {properties.start_date && issue.start_date && (
+            <ViewStartDateSelect
+              issue={issue}
+              partialUpdateIssue={partialUpdateIssue}
               user={user}
               isNotAllowed={isNotAllowed}
             />

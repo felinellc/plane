@@ -1,5 +1,6 @@
 import React from "react";
 
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 import useSWR from "swr";
@@ -7,12 +8,12 @@ import useSWR from "swr";
 // services
 import issuesService from "services/issues.service";
 // components
+import { ActivityIcon, ActivityMessage } from "components/core";
 import { CommentCard } from "components/issues/comment";
 // ui
 import { Icon, Loader } from "components/ui";
 // helpers
 import { timeAgo } from "helpers/date-time.helper";
-import { activityDetails } from "helpers/activity.helper";
 // types
 import { ICurrentUserResponse, IIssueComment } from "types";
 // fetch-keys
@@ -90,11 +91,11 @@ export const IssueActivitySection: React.FC<Props> = ({ issueId, user }) => {
       <ul role="list" className="-mb-4">
         {issueActivities.map((activityItem, index) => {
           // determines what type of action is performed
-          const message = activityItem.field
-            ? activityDetails[activityItem.field as keyof typeof activityDetails]?.message(
-                activityItem
-              )
-            : "created the issue.";
+          const message = activityItem.field ? (
+            <ActivityMessage activity={activityItem} />
+          ) : (
+            "created the issue."
+          );
 
           if ("field" in activityItem && activityItem.field !== "updated_by") {
             return (
@@ -115,14 +116,13 @@ export const IssueActivitySection: React.FC<Props> = ({ issueId, user }) => {
                               activityItem.new_value === "restore" ? (
                                 <Icon iconName="history" className="text-sm text-custom-text-200" />
                               ) : (
-                                activityDetails[activityItem.field as keyof typeof activityDetails]
-                                  ?.icon
+                                <ActivityIcon activity={activityItem} />
                               )
                             ) : activityItem.actor_detail.avatar &&
                               activityItem.actor_detail.avatar !== "" ? (
                               <img
                                 src={activityItem.actor_detail.avatar}
-                                alt={activityItem.actor_detail.first_name}
+                                alt={activityItem.actor_detail.display_name}
                                 height={24}
                                 width={24}
                                 className="rounded-full"
@@ -131,7 +131,7 @@ export const IssueActivitySection: React.FC<Props> = ({ issueId, user }) => {
                               <div
                                 className={`grid h-7 w-7 place-items-center rounded-full border-2 border-white bg-gray-700 text-xs text-white`}
                               >
-                                {activityItem.actor_detail.first_name.charAt(0)}
+                                {activityItem.actor_detail.display_name.charAt(0)}
                               </div>
                             )}
                           </div>
@@ -143,13 +143,16 @@ export const IssueActivitySection: React.FC<Props> = ({ issueId, user }) => {
                         {activityItem.field === "archived_at" &&
                         activityItem.new_value !== "restore" ? (
                           <span className="text-gray font-medium">Plane</span>
-                        ) : (
+                        ) : activityItem.actor_detail.is_bot ? (
                           <span className="text-gray font-medium">
-                            {activityItem.actor_detail.first_name}
-                            {activityItem.actor_detail.is_bot
-                              ? " Bot"
-                              : " " + activityItem.actor_detail.last_name}
+                            {activityItem.actor_detail.first_name} Bot
                           </span>
+                        ) : (
+                          <Link href={`/${workspaceSlug}/profile/${activityItem.actor_detail.id}`}>
+                            <a className="text-gray font-medium">
+                              {activityItem.actor_detail.display_name}
+                            </a>
+                          </Link>
                         )}{" "}
                         {message}{" "}
                         <span className="whitespace-nowrap">

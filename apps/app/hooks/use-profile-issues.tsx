@@ -12,6 +12,7 @@ import { profileIssuesContext } from "contexts/profile-issues-context";
 import { IIssue } from "types";
 // fetch-keys
 import { USER_PROFILE_ISSUES } from "constants/fetch-keys";
+import { useWorkspaceMyMembership } from "contexts/workspace-member.context";
 
 const useProfileIssues = (workspaceSlug: string | undefined, userId: string | undefined) => {
   const {
@@ -33,6 +34,8 @@ const useProfileIssues = (workspaceSlug: string | undefined, userId: string | un
 
   const router = useRouter();
 
+  const { memberRole } = useWorkspaceMyMembership();
+
   const params: any = {
     assignees: filters?.assignees ? filters?.assignees.join(",") : undefined,
     created_by: filters?.created_by ? filters?.created_by.join(",") : undefined,
@@ -43,14 +46,14 @@ const useProfileIssues = (workspaceSlug: string | undefined, userId: string | un
     state_group: filters?.state_group ? filters?.state_group.join(",") : undefined,
     target_date: filters?.target_date ? filters?.target_date.join(",") : undefined,
     type: filters?.type ? filters?.type : undefined,
-    subscriber: filters?.subscriber ? filters?.subscriber : undefined,
+    subscriber: filters?.subscriber ? filters?.subscriber.join(",") : undefined,
   };
 
   const { data: userProfileIssues, mutate: mutateProfileIssues } = useSWR(
-    workspaceSlug && userId
+    workspaceSlug && userId && (memberRole.isOwner || memberRole.isMember || memberRole.isViewer)
       ? USER_PROFILE_ISSUES(workspaceSlug.toString(), userId.toString(), params)
       : null,
-    workspaceSlug && userId
+    workspaceSlug && userId && (memberRole.isOwner || memberRole.isMember || memberRole.isViewer)
       ? () => userService.getUserProfileIssues(workspaceSlug.toString(), userId.toString(), params)
       : null
   );
@@ -73,8 +76,6 @@ const useProfileIssues = (workspaceSlug: string | undefined, userId: string | un
   useEffect(() => {
     if (!userId || !filters) return;
 
-    console.log("Triggered");
-
     if (
       router.pathname.includes("assigned") &&
       (!filters.assignees || !filters.assignees.includes(userId))
@@ -92,7 +93,7 @@ const useProfileIssues = (workspaceSlug: string | undefined, userId: string | un
     }
 
     if (router.pathname.includes("subscribed") && filters.subscriber === null) {
-      setFilters({ subscriber: userId });
+      setFilters({ subscriber: [userId] });
       return;
     }
   }, [filters, router, setFilters, userId]);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Image from "next/image";
 
@@ -15,6 +15,7 @@ import useToast from "hooks/use-toast";
 import {
   GoogleLoginButton,
   GithubLoginButton,
+  OidcLoginButton,
   EmailCodeForm,
   EmailPasswordForm,
 } from "components/account";
@@ -22,6 +23,14 @@ import {
 import { Spinner } from "components/ui";
 // images
 import BluePlaneLogoWithoutText from "public/plane-logos/blue-without-text.png";
+// mobx react lite
+import { observer } from "mobx-react-lite";
+// mobx store
+import { useMobxStore } from "lib/mobx/store-provider";
+// next themes
+import { useTheme } from "next-themes";
+import { IUser } from "types";
+
 // types
 type EmailPasswordFormValues = {
   email: string;
@@ -29,10 +38,19 @@ type EmailPasswordFormValues = {
   medium?: string;
 };
 
-const HomePage: NextPage = () => {
+const HomePage: NextPage = observer(() => {
+  const store: any = useMobxStore();
+  const { setTheme } = useTheme();
+
   const { isLoading, mutateUser } = useUserAuth("sign-in");
 
   const { setToastAlert } = useToast();
+
+  const handleTheme = (user: IUser) => {
+    const currentTheme = user.theme.theme ?? "system";
+    setTheme(currentTheme);
+    store?.user?.setCurrentUserSettings();
+  };
 
   const handleGoogleSignIn = async ({ clientId, credential }: any) => {
     try {
@@ -43,7 +61,10 @@ const HomePage: NextPage = () => {
           clientId,
         };
         const response = await authenticationService.socialAuth(socialAuthPayload);
-        if (response && response?.user) mutateUser();
+        if (response && response?.user) {
+          mutateUser();
+          handleTheme(response?.user);
+        }
       } else {
         throw Error("Cant find credentials");
       }
@@ -66,7 +87,10 @@ const HomePage: NextPage = () => {
           clientId: process.env.NEXT_PUBLIC_GITHUB_ID,
         };
         const response = await authenticationService.socialAuth(socialAuthPayload);
-        if (response && response?.user) mutateUser();
+        if (response && response?.user) {
+          mutateUser();
+          handleTheme(response?.user);
+        }
       } else {
         throw Error("Cant find credentials");
       }
@@ -80,12 +104,39 @@ const HomePage: NextPage = () => {
     }
   };
 
+  const handleOidcSignIn = async (credential: string) => {
+    try {
+      if (process.env.NEXT_PUBLIC_OIDC_CLIENT_ID && credential) {
+        const oidcAuthPayload = {
+          credential,
+          clientId: process.env.NEXT_PUBLIC_OIDC_CLIENT_ID,
+        };
+        const response = await authenticationService.oidcAuth(oidcAuthPayload);
+        if (response && response?.user) mutateUser();
+      } else {
+        throw Error("Cant find credentials");
+      }
+    } catch (error: any) {
+      console.log(error);
+      setToastAlert({
+        title: "Error signing in!",
+        type: "error",
+        message:
+          error?.error ||
+          "Something went wrong. Please try again later or contact the support team.",
+      });
+    }
+  };
+
   const handlePasswordSignIn = async (formData: EmailPasswordFormValues) => {
     await authenticationService
       .emailLogin(formData)
       .then((response) => {
         try {
-          if (response) mutateUser();
+          if (response) {
+            mutateUser();
+            handleTheme(response?.user);
+          }
         } catch (err: any) {
           setToastAlert({
             type: "error",
@@ -109,7 +160,10 @@ const HomePage: NextPage = () => {
 
   const handleEmailCodeSignIn = async (response: any) => {
     try {
-      if (response) mutateUser();
+      if (response) {
+        mutateUser();
+        handleTheme(response?.user);
+      }
     } catch (err: any) {
       setToastAlert({
         type: "error",
@@ -140,19 +194,27 @@ const HomePage: NextPage = () => {
           </>
           <div className="grid place-items-center h-full overflow-y-auto py-5 px-7">
             <div>
-              {parseInt(process.env.NEXT_PUBLIC_ENABLE_OAUTH || "0") ? (
+              {parseInt(process.env.NEXT_PUBLIC_ENABLE_OAUTH || "0") ||
+              parseInt(process.env.NEXT_PUBLIC_ENABLE_OIDC || "0") ? (
                 <>
                   <h1 className="text-center text-2xl sm:text-2.5xl font-semibold text-custom-text-100">
                     Sign in to Plane
                   </h1>
-                  <div className="flex flex-col divide-y divide-custom-border-200">
-                    <div className="pb-7">
-                      <EmailCodeForm handleSignIn={handleEmailCodeSignIn} />
-                    </div>
-                    <div className="flex flex-col items-center justify-center gap-4 pt-7 sm:w-[360px] mx-auto overflow-hidden">
-                      <GoogleLoginButton handleSignIn={handleGoogleSignIn} />
-                      <GithubLoginButton handleSignIn={handleGitHubSignIn} />
-                    </div>
+                  {parseInt(process.env.NEXT_PUBLIC_AUTO_OIDC || "0") ? (
+                    <></>
+                  ) : (
+                    <EmailCodeForm handleSignIn={handleEmailCodeSignIn} />
+                  )}
+                  <div className="flex flex-col items-center justify-center gap-3 border-t border-brand-base py-5 px-5">
+                    {parseInt(process.env.NEXT_PUBLIC_ENABLE_OAUTH || "0") ? (
+                      <>
+                        <GoogleLoginButton handleSignIn={handleGoogleSignIn} />
+                        <GithubLoginButton handleSignIn={handleGitHubSignIn} />
+                      </>
+                    ) : null}
+                    {parseInt(process.env.NEXT_PUBLIC_ENABLE_OIDC || "0") ? (
+                      <OidcLoginButton handleSignIn={handleOidcSignIn} />
+                    ) : null}
                   </div>
                 </>
               ) : (
@@ -178,6 +240,6 @@ const HomePage: NextPage = () => {
       )}
     </DefaultLayout>
   );
-};
+});
 
 export default HomePage;
