@@ -27,6 +27,8 @@ from .user import (
 
 from .oauth import OauthEndpoint
 
+from .oidc import OIDCEndpoint
+
 from .base import BaseAPIView, BaseViewSet
 
 from .workspace import (
